@@ -1,17 +1,41 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("You're logged in!") }}
-                </div>
+    <div class="p-8">
+
+        <h1 class="text-3xl font-bold">
+
+            Dashboard
+
+        </h1>
+
+        <div class="grid grid-cols-3 gap-5 mt-8">
+
+            <div class="bg-white rounded shadow p-5">
+
+                <h2>Total Tickets</h2>
+
+                <p class="text-4xl">{{ $totalTickets }}</p>
+
             </div>
+
+            <div class="bg-white rounded shadow p-5">
+
+                <h2>Open</h2>
+
+                <p class="text-4xl">{{ $openTickets }}</p>
+
+            </div>
+
+            <div class="bg-white rounded shadow p-5">
+
+                <h2>Closed</h2>
+
+                <p class="text-4xl">{{ $closedTickets }}</p>
+
+            </div>
+
         </div>
+
     </div>
+
 </x-app-layout>

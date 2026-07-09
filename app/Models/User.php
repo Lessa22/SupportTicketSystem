@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Enums\UserRole;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -43,5 +44,24 @@ public function createdTickets()
 public function assignedTickets()
 {
     return $this->hasMany(Ticket::class, 'agent_id');
+}
+public function isAdmin(): bool
+{
+    return $this->role === UserRole::ADMIN->value;
+}
+
+public function isSupervisor(): bool
+{
+    return $this->role === UserRole::SUPERVISOR->value;
+}
+
+public function isAgent(): bool
+{
+    return $this->role === UserRole::AGENT->value;
+}
+
+public function isCustomer(): bool
+{
+    return $this->role === UserRole::CUSTOMER->value;
 }
 }
