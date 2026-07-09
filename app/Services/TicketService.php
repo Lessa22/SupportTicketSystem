@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\TicketRepositoryInterface;
 use App\Models\Ticket;
+use Illuminate\Support\Facades\Auth;
 
 class TicketService
 {
@@ -22,10 +23,14 @@ class TicketService
         return $this->repository->find($id);
     }
 
-    public function create(array $data): Ticket
-    {
-        return $this->repository->create($data);
-    }
+  public function create(array $data)
+{
+    $data['customer_id']=Auth::id();
+
+    $data['status']='open';
+
+    return $this->repository->create($data);
+}
 
     public function update(Ticket $ticket, array $data): bool
     {
