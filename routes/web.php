@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,6 +24,26 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard');
 
     Route::resource('tickets', TicketController::class);
+
+    Route::patch(
+    '/tickets/{ticket}/status',
+    [TicketController::class, 'changeStatus']
+)->name('tickets.changeStatus');
+});
+Route::middleware('auth')->group(function () {
+
+    Route::get(
+        '/notifications',
+        [NotificationController::class,'index']
+    )->name('notifications.index');
+
+});
+Route::middleware('auth')->group(function () {
+
+    Route::get('/dashboard',
+        [DashboardController::class,'index'])
+        ->name('dashboard');
+
 });
 
 require __DIR__.'/auth.php';

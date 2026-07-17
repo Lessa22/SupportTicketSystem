@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\TicketRepositoryInterface;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Auth;
+use App\Services\AssignmentService;
 
 class TicketService
 {
@@ -23,13 +24,18 @@ class TicketService
         return $this->repository->find($id);
     }
 
-  public function create(array $data)
+public function create(array $data): Ticket
 {
-    $data['customer_id']=Auth::id();
+    $data['customer_id'] = auth()->id();
 
-    $data['status']='open';
+    $data['status'] = 'open';
 
-    return $this->repository->create($data);
+    $ticket = $this->repository->create($data);
+
+    app(AssignmentService::class)
+        ->assign($ticket, 'round_robin');
+
+    return $ticket;
 }
 
     public function update(Ticket $ticket, array $data): bool

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Enums\UserRole;
+use App\Models\Notification;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -64,4 +65,9 @@ public function isCustomer(): bool
 {
     return $this->role === UserRole::CUSTOMER->value;
 }
+public function notifications()
+{
+    return $this->hasMany(Notification::class);
 }
+}
+

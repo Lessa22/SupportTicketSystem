@@ -2,50 +2,53 @@
 
 namespace App\Services;
 
-use App\Enums\TicketStatus;
 use App\Exceptions\InvalidTicketTransitionException;
 use App\Models\Ticket;
 
 class TicketStateService
 {
-    public function changeStatus(Ticket $ticket, TicketStatus $newStatus): void
+    private array $transitions = [
+
+        'open' => [
+            'assigned'
+        ],
+
+        'assigned' => [
+            'in_progress'
+        ],
+
+        'in_progress' => [
+            'resolved'
+        ],
+
+        'resolved' => [
+            'closed'
+        ],
+
+        'closed' => [
+            'reopened'
+        ],
+
+        'reopened' => [
+            'assigned'
+        ],
+    ];
+
+    public function changeStatus(Ticket $ticket, string $newStatus): void
     {
-        $allowedTransitions = [
-            TicketStatus::OPEN->value => [
-                TicketStatus::ASSIGNED->value
-            ],
+        $current = $ticket->status;
 
-            TicketStatus::ASSIGNED->value => [
-                TicketStatus::IN_PROGRESS->value
-            ],
-
-            TicketStatus::IN_PROGRESS->value => [
-                TicketStatus::RESOLVED->value
-            ],
-
-            TicketStatus::RESOLVED->value => [
-                TicketStatus::CLOSED->value
-            ],
-
-            TicketStatus::CLOSED->value => [
-                TicketStatus::REOPENED->value
-            ],
-
-            TicketStatus::REOPENED->value => [
-                TicketStatus::ASSIGNED->value
-            ],
-        ];
-
-        if (! in_array(
-            $newStatus->value,
-            $allowedTransitions[$ticket->status] ?? []
-        )) {
+        if (
+            ! isset($this->transitions[$current]) ||
+            ! in_array($newStatus, $this->transitions[$current])
+        ) {
             throw new InvalidTicketTransitionException(
-                "Invalid transition from {$ticket->status} to {$newStatus->value}"
+                $current,
+                $newStatus
             );
         }
 
-        $ticket->status = $newStatus->value;
+        $ticket->status = $newStatus;
 
         $ticket->save();
     }

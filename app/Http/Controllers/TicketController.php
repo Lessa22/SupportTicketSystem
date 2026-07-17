@@ -30,13 +30,15 @@ class TicketController extends Controller
     ]);
 }
 
-  public function store(StoreTicketRequest $request)
+public function store(StoreTicketRequest $request)
 {
-    $this->ticketService->create($request->validated());
+    $this->ticketService->create(
+        $request->validated()
+    );
 
     return redirect()
         ->route('tickets.index')
-        ->with('success','Ticket created successfully.');
+        ->with('success', 'Ticket created successfully.');
 }
 
     public function show(Ticket $ticket)
@@ -81,5 +83,35 @@ return view('tickets.show', compact('ticket'));
 public function __construct(TicketService $ticketService)
 {
     $this->ticketService = $ticketService;
+}
+public function changeStatus(
+    \Illuminate\Http\Request $request,
+    \App\Models\Ticket $ticket,
+    \App\Services\TicketStateService $stateService
+)
+{
+    $request->validate([
+        'status' => 'required|string'
+    ]);
+
+    try {
+
+        $stateService->changeStatus(
+            $ticket,
+            $request->status
+        );
+
+        return back()->with(
+            'success',
+            'Ticket status updated successfully.'
+        );
+
+    } catch (\Exception $e) {
+
+        return back()->with(
+            'error',
+            $e->getMessage()
+        );
+    }
 }
 }
