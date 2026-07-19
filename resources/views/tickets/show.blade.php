@@ -96,94 +96,151 @@
                 Change Status
             </h2>
 
-            @if($ticket->status=='open')
+            @if($ticket->status == 'open')
+    <span class="px-2 py-1 rounded bg-green-100 text-green-700">Open</span>
 
-                <form method="POST" action="{{ route('tickets.changeStatus',$ticket) }}">
-                    @csrf
-                    @method('PATCH')
+@elseif($ticket->status == 'assigned')
+    <span class="px-2 py-1 rounded bg-yellow-100 text-yellow-700">Assigned</span>
 
-                    <input type="hidden" name="status" value="assigned">
+@elseif($ticket->status == 'in_progress')
+    <span class="px-2 py-1 rounded bg-blue-100 text-blue-700">In Progress</span>
 
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
-                        Assign
-                    </button>
+@elseif($ticket->status == 'resolved')
+    <span class="px-2 py-1 rounded bg-emerald-100 text-emerald-700">Resolved</span>
 
-                </form>
-
-            @elseif($ticket->status=='assigned')
-
-                <form method="POST" action="{{ route('tickets.changeStatus',$ticket) }}">
-                    @csrf
-                    @method('PATCH')
-
-                    <input type="hidden" name="status" value="in_progress">
-
-                    <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg">
-                        Start Progress
-                    </button>
-
-                </form>
-
-            @elseif($ticket->status=='in_progress')
-
-                <form method="POST" action="{{ route('tickets.changeStatus',$ticket) }}">
-                    @csrf
-                    @method('PATCH')
-
-                    <input type="hidden" name="status" value="resolved">
-
-                    <button class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
-                        Resolve
-                    </button>
-
-                </form>
-
-            @elseif($ticket->status=='resolved')
-
-                <form method="POST" action="{{ route('tickets.changeStatus',$ticket) }}">
-                    @csrf
-                    @method('PATCH')
-
-                    <input type="hidden" name="status" value="closed">
-
-                    <button class="bg-gray-700 hover:bg-gray-800 text-white px-6 py-3 rounded-lg">
-                        Close
-                    </button>
-
-                </form>
-
-            @elseif($ticket->status=='closed')
-
-                <form method="POST" action="{{ route('tickets.changeStatus',$ticket) }}">
-                    @csrf
-                    @method('PATCH')
-
-                    <input type="hidden" name="status" value="reopened">
-
-                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg">
-                        Reopen
-                    </button>
-
-                </form>
-
-            @elseif($ticket->status=='reopened')
-
-                <form method="POST" action="{{ route('tickets.changeStatus',$ticket) }}">
-                    @csrf
-                    @method('PATCH')
-
-                    <input type="hidden" name="status" value="assigned">
-
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
-                        Assign Again
-                    </button>
-
-                </form>
-
-            @endif
-
+@else
+    <span class="px-2 py-1 rounded bg-gray-200 text-gray-700">Closed</span>
+@endif
         </div>
+        <hr>
+
+<h4>Activity History</h4>
+
+<table class="table table-striped">
+
+<thead>
+<tr>
+<th>Action</th>
+<th>Description</th>
+<th>Date</th>
+</tr>
+</thead>
+
+<tbody>
+
+@foreach($ticket->activityLogs as $log)
+
+<tr>
+<td>{{ ucfirst($log->action) }}</td>
+<td>{{ $log->description }}</td>
+<td>{{ $log->created_at }}</td>
+</tr>
+
+@endforeach
+
+</tbody>
+
+</table>
 
     </div>
+    <div class="mt-6 p-4 bg-white rounded shadow">
+
+<h2 class="font-bold text-lg">
+
+SLA
+
+</h2>
+
+<p>
+
+Deadline :
+
+{{ $ticket->sla_deadline?->format('d/m/Y H:i') }}
+
+</p>
+
+@if($ticket->isExpired())
+
+<span class="text-red-600 font-bold">
+
+🔴 Expired
+
+</span>
+
+@else
+
+<span class="text-green-600 font-bold">
+
+🟢
+
+{{ $ticket->remainingHours() }}
+
+hours remaining
+
+</span>
+
+@endif
+
+</div>
+@if($ticket->agent)
+<div class="mb-3">
+    <strong>Assigned Agent :</strong>
+    {{ $ticket->agent->name }}
+</div>
+@endif
+<hr>
+
+<h3 class="mt-4">Discussion</h3>
+
+@forelse($ticket->messages as $message)
+
+<div class="card mb-2">
+
+    <div class="card-body">
+
+        <strong>{{ $message->user->name }}</strong>
+
+        <small class="text-muted float-end">
+            {{ $message->created_at->format('d/m/Y H:i') }}
+        </small>
+
+        <p class="mt-2">
+            {{ $message->message }}
+        </p>
+
+    </div>
+
+</div>
+
+@empty
+
+<div class="alert alert-secondary">
+    No messages yet.
+</div>
+
+@endforelse
+<form method="POST"
+      action="{{ route('tickets.messages.store',$ticket) }}">
+
+    @csrf
+
+    <div class="mb-3">
+
+        <textarea
+            name="message"
+            class="form-control"
+            rows="4"
+            placeholder="Write a message..."
+            required></textarea>
+
+    </div>
+
+    <button class="btn btn-primary">
+
+        Send Message
+
+    </button>
+
+</form>
 
 </x-app-layout>

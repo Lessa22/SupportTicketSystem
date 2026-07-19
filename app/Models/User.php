@@ -48,22 +48,22 @@ public function assignedTickets()
 }
 public function isAdmin(): bool
 {
-    return $this->role === UserRole::ADMIN->value;
+    return $this->role === 'admin';
 }
 
 public function isSupervisor(): bool
 {
-    return $this->role === UserRole::SUPERVISOR->value;
+    return $this->role === 'supervisor';
 }
 
 public function isAgent(): bool
 {
-    return $this->role === UserRole::AGENT->value;
+    return $this->role === 'agent';
 }
 
 public function isCustomer(): bool
 {
-    return $this->role === UserRole::CUSTOMER->value;
+    return $this->role === 'customer';
 }
 public function notifications()
 {

@@ -2,32 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Priority;
 use App\Models\Ticket;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard', [
+        $totalTickets = Ticket::count();
 
-            'totalTickets' => Ticket::count(),
+        $openTickets = Ticket::where('status', 'open')->count();
 
-            'openTickets' => Ticket::where('status','open')->count(),
+        $assignedTickets = Ticket::where('status', 'assigned')->count();
 
-            'assignedTickets' => Ticket::where('status','assigned')->count(),
+        $progressTickets = Ticket::where('status', 'in_progress')->count();
 
-            'progressTickets' => Ticket::where('status','in_progress')->count(),
+        $resolvedTickets = Ticket::where('status', 'resolved')->count();
 
-            'resolvedTickets' => Ticket::where('status','resolved')->count(),
+        $closedTickets = Ticket::where('status', 'closed')->count();
 
-            'closedTickets' => Ticket::where('status','closed')->count(),
+        $recentTickets = Ticket::latest()->take(5)->get();
 
-            'categories'=>Category::withCount('tickets')->get(),
+                $highPriority = Ticket::where('priority_id',3)->count();
 
-            'priorities'=>Priority::withCount('tickets')->get(),
+$todayTickets = Ticket::whereDate(
+    'created_at',
+    today()
+)->count();
+        return view('dashboard', compact(
+            'totalTickets',
+            'openTickets',
+            'assignedTickets',
+            'progressTickets',
+            'resolvedTickets',
+            'closedTickets',
+            'recentTickets',
+            'highPriority',
+            'todayTickets'
+        ));
 
-        ]);
     }
+    
 }

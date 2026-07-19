@@ -7,10 +7,34 @@ use App\Models\Ticket;
 
 class TicketRepository implements TicketRepositoryInterface
 {
-    public function all()
-    {
-        return Ticket::latest()->paginate(10);
+  public function all()
+{
+    $query = Ticket::query();
+
+    if (request('search')) {
+        $query->where(function ($q) {
+            $q->where('title', 'like', '%' . request('search') . '%')
+              ->orWhere('description', 'like', '%' . request('search') . '%');
+        });
     }
+
+    if (request('status')) {
+        $query->where('status', request('status'));
+    }
+
+    if (request('priority')) {
+        $query->where('priority_id', request('priority'));
+    }
+
+    if (request('category')) {
+        $query->where('category_id', request('category'));
+    }
+
+    return $query
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
+}
 
     public function find(int $id): ?Ticket
     {

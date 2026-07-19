@@ -13,14 +13,23 @@ use App\Models\Category;
 use App\Models\Priority;
 
 
+
 class TicketController extends Controller
 {
-    public function index()
-    {
-        $tickets = $this->ticketService->getAll();
+  public function index()
+{
+    $tickets = $this->ticketService->getAll();
 
-        return view('tickets.index', compact('tickets'));
-    }
+    $categories = Category::all();
+
+    $priorities = Priority::all();
+
+    return view('tickets.index', compact(
+        'tickets',
+        'categories',
+        'priorities'
+    ));
+}
 
    public function create()
 {

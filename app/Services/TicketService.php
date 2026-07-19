@@ -26,12 +26,11 @@ class TicketService
 
 public function create(array $data): Ticket
 {
-    $data['customer_id'] = auth()->id();
+ $data['customer_id'] = auth()->id();
+$data['status'] = 'open';
+$data['sla_deadline'] = now()->addHours(24);
 
-    $data['status'] = 'open';
-
-    $ticket = $this->repository->create($data);
-
+$ticket = $this->repository->create($data);
     app(AssignmentService::class)
         ->assign($ticket, 'round_robin');
 

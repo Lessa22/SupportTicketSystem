@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\TicketMessage;
 
 class Ticket extends Model
 {
@@ -15,6 +16,11 @@ class Ticket extends Model
         'priority_id',
         'status'
     ];
+    protected $casts = [
+
+    'sla_deadline' => 'datetime',
+
+];
 
     public function customer()
     {
@@ -45,4 +51,29 @@ class Ticket extends Model
     {
         return $this->hasMany(ActivityLog::class);
     }
+public function isExpired(): bool
+{
+    if ($this->sla_deadline === null) {
+        return false;
+    }
+
+    return now()->greaterThan($this->sla_deadline);
+}
+
+public function remainingHours(): int
+{
+    if ($this->sla_deadline === null) {
+        return 0;
+    }
+
+    if ($this->isExpired()) {
+        return 0;
+    }
+
+    return now()->diffInHours($this->sla_deadline);
+}
+public function activityLogs()
+{
+    return $this->hasMany(ActivityLog::class);
+}
 }

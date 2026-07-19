@@ -18,4 +18,5 @@ class NotificationController extends Controller
             compact('notifications')
         );
     }
+    
 }
