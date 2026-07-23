@@ -10,11 +10,11 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, ...$roles)
     {
         if (!auth()->check()) {
-            return redirect()->route('login');
+            abort(403);
         }
 
         if (!in_array(auth()->user()->role, $roles)) {
-            abort(403);
+            abort(403, 'Unauthorized');
         }
 
         return $next($request);

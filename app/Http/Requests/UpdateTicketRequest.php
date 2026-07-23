@@ -13,16 +13,17 @@ class UpdateTicketRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-
+        $rules = [
             'title'=>'required|max:255',
-
             'description'=>'required|min:10',
-
             'category_id'=>'required|exists:categories,id',
-
             'priority_id'=>'required|exists:priorities,id',
-
         ];
+
+        if (auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isSupervisor())) {
+            $rules['agent_id'] = 'nullable|exists:users,id,role,agent';
+        }
+
+        return $rules;
     }
 }

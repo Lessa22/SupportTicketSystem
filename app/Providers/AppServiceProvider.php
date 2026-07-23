@@ -7,6 +7,8 @@ use App\Contracts\TicketRepositoryInterface;
 use App\Repositories\TicketRepository;
 use App\Models\Ticket;
 use App\Observers\TicketObserver;
+use App\Policies\TicketPolicy;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,9 +18,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-    TicketRepositoryInterface::class,
-    TicketRepository::class
-);
+            TicketRepositoryInterface::class,
+            TicketRepository::class
+        );
     }
 
     /**
@@ -27,5 +29,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Ticket::observe(TicketObserver::class);
+        Gate::policy(Ticket::class, TicketPolicy::class);
     }
 }

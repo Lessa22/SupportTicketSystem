@@ -4,6 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\TicketMessage;
+use App\States\Ticket\TicketState;
+use App\States\Ticket\OpenState;
+use App\States\Ticket\AssignedState;
+use App\States\Ticket\InProgressState;
+use App\States\Ticket\ResolvedState;
+use App\States\Ticket\ClosedState;
+use App\States\Ticket\ReopenedState;
 
 class Ticket extends Model
 {
@@ -17,10 +24,21 @@ class Ticket extends Model
         'status'
     ];
     protected $casts = [
+        'sla_deadline' => 'datetime',
+    ];
 
-    'sla_deadline' => 'datetime',
-
-];
+    public function getState(): TicketState
+    {
+        return match ($this->status) {
+            'open' => new OpenState($this),
+            'assigned' => new AssignedState($this),
+            'in_progress' => new InProgressState($this),
+            'resolved' => new ResolvedState($this),
+            'closed' => new ClosedState($this),
+            'reopened' => new ReopenedState($this),
+            default => new OpenState($this),
+        };
+    }
 
     public function customer()
     {

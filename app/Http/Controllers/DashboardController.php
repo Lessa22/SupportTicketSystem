@@ -2,32 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use App\Models\Ticket;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $totalTickets = Ticket::count();
+        $user = auth()->user();
 
-        $openTickets = Ticket::where('status', 'open')->count();
+        $query = Ticket::query();
+        $recentQuery = Ticket::query();
 
-        $assignedTickets = Ticket::where('status', 'assigned')->count();
+        if ($user && $user->isCustomer()) {
+            $query->where('customer_id', $user->id);
+            $recentQuery->where('customer_id', $user->id);
+        }
 
-        $progressTickets = Ticket::where('status', 'in_progress')->count();
+        $totalTickets = (clone $query)->count();
+        $openTickets = (clone $query)->where('status', 'open')->count();
+        $assignedTickets = (clone $query)->where('status', 'assigned')->count();
+        $progressTickets = (clone $query)->where('status', 'in_progress')->count();
+        $resolvedTickets = (clone $query)->where('status', 'resolved')->count();
+        $closedTickets = (clone $query)->where('status', 'closed')->count();
+        $recentTickets = $recentQuery->latest()->take(5)->get();
+        $highPriority = (clone $query)->where('priority_id', 3)->count();
+        $todayTickets = (clone $query)->whereDate('created_at', today())->count();
 
-        $resolvedTickets = Ticket::where('status', 'resolved')->count();
+        $activeStrategy = Setting::get('active_assignment_strategy', 'round_robin');
 
-        $closedTickets = Ticket::where('status', 'closed')->count();
-
-        $recentTickets = Ticket::latest()->take(5)->get();
-
-                $highPriority = Ticket::where('priority_id',3)->count();
-
-$todayTickets = Ticket::whereDate(
-    'created_at',
-    today()
-)->count();
         return view('dashboard', compact(
             'totalTickets',
             'openTickets',
@@ -37,9 +41,21 @@ $todayTickets = Ticket::whereDate(
             'closedTickets',
             'recentTickets',
             'highPriority',
-            'todayTickets'
+            'todayTickets',
+            'activeStrategy'
         ));
-
     }
-    
+
+    public function updateSettings(Request $request)
+    {
+        abort_unless(auth()->user()->isAdmin() || auth()->user()->isSupervisor(), 403);
+
+        $request->validate([
+            'active_assignment_strategy' => 'required|in:manual,round_robin,least_loaded',
+        ]);
+
+        Setting::set('active_assignment_strategy', $request->active_assignment_strategy);
+
+        return back()->with('success', 'System assignment strategy updated successfully.');
+    }
 }

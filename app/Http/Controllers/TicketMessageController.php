@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Ticket;
 use App\Models\TicketMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class TicketMessageController extends Controller
 {
     public function store(Request $request, Ticket $ticket)
     {
+        Gate::authorize('addMessage', $ticket);
+
         $request->validate([
             'message'=>'required'
         ]);
@@ -20,6 +23,8 @@ class TicketMessageController extends Controller
             'message'=>$request->message,
         ]);
 
-        return back();
+        return redirect()
+            ->route('tickets.show', $ticket)
+            ->with('success', 'Message sent successfully.');
     }
 }

@@ -7,49 +7,17 @@ use App\Models\Ticket;
 
 class TicketStateService
 {
-    private array $transitions = [
-
-        'open' => [
-            'assigned'
-        ],
-
-        'assigned' => [
-            'in_progress'
-        ],
-
-        'in_progress' => [
-            'resolved'
-        ],
-
-        'resolved' => [
-            'closed'
-        ],
-
-        'closed' => [
-            'reopened'
-        ],
-
-        'reopened' => [
-            'assigned'
-        ],
-    ];
-
     public function changeStatus(Ticket $ticket, string $newStatus): void
     {
-        $current = $ticket->status;
+        $state = $ticket->getState();
 
-        if (
-            ! isset($this->transitions[$current]) ||
-            ! in_array($newStatus, $this->transitions[$current])
-        ) {
-            throw new InvalidTicketTransitionException(
-                $current,
-                $newStatus
-            );
-        }
-
-        $ticket->status = $newStatus;
-
-        $ticket->save();
+        match ($newStatus) {
+            'assigned' => $state->assign(),
+            'in_progress' => $state->start(),
+            'resolved' => $state->resolve(),
+            'closed' => $state->close(),
+            'reopened' => $state->reopen(),
+            default => throw new InvalidTicketTransitionException($ticket->status, $newStatus),
+        };
     }
 }

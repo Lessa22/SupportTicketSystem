@@ -1,19 +1,68 @@
-<x-app-layout>
+@extends('layouts.app')
 
-<div class="container">
+@section('content')
 
-<h2>Notifications</h2>
+<div class="max-w-5xl mx-auto py-8">
 
-@foreach($notifications as $notification)
+<h1 class="text-3xl font-bold mb-6">
+Notifications
+</h1>
 
-<div class="alert alert-info">
+@forelse($notifications as $notification)
+
+<div class="bg-white shadow rounded p-5 mb-4">
+
+<p>
 
 {{ $notification->message }}
 
+</p>
+
+<small class="text-gray-500">
+
+{{ $notification->created_at->diffForHumans() }}
+
+</small>
+
+@if(!$notification->is_read)
+
+<form
+action="{{ route('notifications.read',$notification) }}"
+method="POST"
+class="mt-3">
+
+@csrf
+@method('PATCH')
+
+<button
+class="bg-blue-600 text-white px-3 py-2 rounded">
+
+Mark as read
+
+</button>
+
+</form>
+
+@endif
+
 </div>
 
-@endforeach
+@empty
+
+<div class="bg-white p-5 rounded shadow">
+
+No notifications.
 
 </div>
 
-</x-app-layout>
+@endforelse
+
+<div class="mt-5">
+
+{{ $notifications->links() }}
+
+</div>
+
+</div>
+
+@endsection

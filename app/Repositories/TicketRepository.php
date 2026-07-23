@@ -9,7 +9,16 @@ class TicketRepository implements TicketRepositoryInterface
 {
   public function all()
 {
-    $query = Ticket::query();
+    $query = Ticket::with(['category', 'priority', 'agent', 'customer']);
+
+    $user = auth()->user();
+    if ($user && $user->isCustomer()) {
+        $query->where('customer_id', $user->id);
+    } elseif ($user && $user->isAgent()) {
+        if (request('assigned_to_me')) {
+            $query->where('agent_id', $user->id);
+        }
+    }
 
     if (request('search')) {
         $query->where(function ($q) {

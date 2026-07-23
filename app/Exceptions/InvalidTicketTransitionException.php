@@ -2,9 +2,7 @@
 
 namespace App\Exceptions;
 
-use Exception;
-
-class InvalidTicketTransitionException extends Exception
+class InvalidTicketTransitionException extends DomainException
 {
     public function __construct(string $from, string $to)
     {
